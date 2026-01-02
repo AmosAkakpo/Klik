@@ -39,7 +39,7 @@ const NosOffres = () => {
     ]
 
     return (
-        <div className='px-2 py-8 bg-gradient-to-b from-violet-950 via-slate-950 to-black'>
+        <div className='px-2 py-16 bg-neutral-900 border-y-2 border-neutral-800 '>
             <h2 className='text-3xl font-bold text-center'>Une Visibilité adaptee a tous</h2>
             <div className='p-8 flex justify-evenly flex-wrap gap-8'>
                 {offers.map((offer, index) => (

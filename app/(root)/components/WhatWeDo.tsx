@@ -50,7 +50,7 @@ const WhatWeDo = () => {
     }, [])
 
     return (
-        <div className='bg-neutral-950 py-16 px-4'>
+        <div className='bg-neutral-900 py-16 px-4'>
             <div className='max-w-4xl mx-auto mb-12'>
 
                 <p className='text-gray-400 text-center text-lg'>

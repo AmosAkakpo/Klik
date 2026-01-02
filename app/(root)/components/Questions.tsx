@@ -30,7 +30,7 @@ const Questions = () => {
     ]
 
     return (
-        <div className='px-4 py-12 bg-neutral-950'>
+        <div className='px-4 py-12 bg-neutral-900'>
             <div className='max-w-4xl mx-auto'>
                 <div className='text-center mb-12'>
                     <h2 className='text-4xl font-bold text-white mb-3'>

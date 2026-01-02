@@ -14,15 +14,17 @@ export default async function AdminLayout({
     } = await supabase.auth.getUser()
 
     if (!user) {
-        redirect('/admin/login')
+        redirect('/login')
     }
 
     // Fetch the manager profile to get the role
-    const { data: manager } = await supabase
+    const { data: manager, error } = await supabase
         .from('managers')
         .select('role')
         .eq('id', user.id)
         .single()
+
+
 
     // If manager record doesn't exist yet (race condition on signup?), use safe default or error
     // For now, if no manager record, we treat as manager or block. 

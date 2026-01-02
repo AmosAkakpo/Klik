@@ -19,7 +19,7 @@ const OfferCard: React.FC<OfferCardProps> = ({
 }) => {
     return (
         <div className={`flex flex-col items-center justify-center ${borderColor} border-2 rounded-lg`}>
-            <div className='py-4 px-8 text-center bg-neutral-800 w-full rounded-t-lg'>
+            <div className='py-4 px-8 text-center bg-gradient-to-b from-neutral-800 via-neutral-800 to-neutral-900 w-full rounded-t-lg'>
                 <h3 className='text-2xl font-bold'>{title}</h3>
                 <p className='text-gray-200'>{subtitle}</p>
                 <p className='py-2 font-italic text-xs text-gray-500 text-center'>{description}</p>

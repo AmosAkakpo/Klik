@@ -1,73 +1,135 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { MdTrendingUp, MdEmail, MdPeople, MdEvent } from 'react-icons/md'
+import Link from 'next/link'
+import { MdEvent, MdPeople, MdTrendingUp, MdAttachMoney } from 'react-icons/md'
+import RevenueChart from './components/RevenueChart'
 
 export default async function AdminDashboard() {
     const supabase = await createClient()
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) redirect('/login')
 
-    if (!user) {
-        redirect('/admin/login')
+    const { data: manager } = await supabase
+        .from('managers')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    const role = manager?.role || 'manager'
+    const isSuper = role === 'super_admin'
+
+    // --- FETCH STATS ---
+
+    // 1. Listings Count
+    let listingsQuery = supabase.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'active')
+    if (!isSuper) listingsQuery = listingsQuery.eq('created_by', user.id)
+    const { count: activeListings } = await listingsQuery
+
+    // 2. Active Boosts
+    let boostsQuery = supabase.from('listing_boosts').select('id', { count: 'exact', head: true }).eq('is_active', true)
+    if (!isSuper) boostsQuery = boostsQuery.eq('created_by', user.id)
+    const { count: activeBoosts } = await boostsQuery
+
+    // 3. Total Revenue (Super Admin Only)
+    let totalRevenue = 0
+    let last7DaysRevenue = []
+
+    if (isSuper) {
+        // Fetch all completed transactions
+        const { data: transactions } = await supabase
+            .from('transactions')
+            .select('amount, created_at')
+            .eq('status', 'completed')
+
+        if (transactions) {
+            totalRevenue = transactions.reduce((sum, t) => sum + Number(t.amount), 0)
+
+            // Calculate last 7 days
+            const today = new Date()
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today)
+                d.setDate(today.getDate() - i)
+                const dateStr = d.toISOString().split('T')[0]
+
+                // Filter transactions for this day
+                const daySum = transactions
+                    .filter(t => t.created_at.startsWith(dateStr))
+                    .reduce((sum, t) => sum + Number(t.amount), 0)
+
+                last7DaysRevenue.push({ date: dateStr, amount: daySum })
+            }
+        }
     }
 
-    // Fetch some real stats later. For now, placeholders but structured nicely.
-    const stats = [
-        { title: 'Annonces Actives', value: '12', icon: MdEvent, color: 'text-blue-600', bg: 'bg-blue-100' },
-        { title: 'Vues Totales', value: '1,234', icon: MdPeople, color: 'text-violet-600', bg: 'bg-violet-100' },
-        { title: 'Clics Contact', value: '89', icon: MdEmail, color: 'text-rose-600', bg: 'bg-rose-100' },
-        { title: 'Boosts Actifs', value: '3', icon: MdTrendingUp, color: 'text-amber-600', bg: 'bg-amber-100' },
-    ]
-
     return (
-        <div>
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-slate-800">Tableau de bord</h1>
-                <p className="text-slate-500 mt-1">Bienvenue, {user.email}</p>
+        <div className="space-y-8 animate-fade-in-up">
+            <div>
+                <h1 className="text-3xl font-bold text-slate-800">Tableau de Bord</h1>
+                <p className="text-slate-500 mt-1">
+                    Bienvenue, <span className="font-bold text-blue-600">{user.email}</span>
+                </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {stats.map((stat, index) => (
-                    <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                        <div className={`p-4 rounded-xl ${stat.bg} ${stat.color}`}>
-                            <stat.icon className="text-2xl" />
-                        </div>
-                        <div>
-                            <p className="text-slate-500 text-sm font-medium">{stat.title}</p>
-                            <h3 className="text-2xl font-bold text-slate-800">{stat.value}</h3>
-                        </div>
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all hover:border-blue-100 group">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-3 rounded-xl bg-blue-100 text-blue-600"><MdEvent className="text-xl" /></div>
+                        <span className="text-xs font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">Actifs</span>
                     </div>
-                ))}
-            </div>
-
-            <div className="grid grid-cols-6 gap-6">
-                <div className="col-span-12 lg:col-span-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-bold text-slate-800 mb-4">Activité Récente</h3>
-                    <div className="space-y-4">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
-                                <div>
-                                    <p className="font-medium text-slate-700">Nouvelle annonce ajoutée</p>
-                                    <p className="text-xs text-slate-400">Il y a 2 heures</p>
-                                </div>
-                                <span className="text-xs font-bold px-2 py-1 rounded-full bg-green-100 text-green-700">Succès</span>
-                            </div>
-                        ))}
-                    </div>
+                    <h3 className="text-slate-500 font-medium text-sm mb-1">Annonces</h3>
+                    <p className="text-3xl font-black text-slate-800 group-hover:text-blue-600 transition-colors">{activeListings || 0}</p>
                 </div>
 
-                <div className="col-span-12 lg:col-span-2 bg-gradient-to-br from-blue-600 to-violet-700 p-6 rounded-2xl text-white flex flex-col justify-between">
-                    <div>
-                        <h3 className="text-lg font-bold mb-2">Besoin d'aide ?</h3>
-                        <p className="text-blue-100 text-sm mb-6">Contactez le support technique si vous rencontrez des problèmes.</p>
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all hover:border-orange-100 group">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-3 rounded-xl bg-orange-100 text-orange-600"><MdTrendingUp className="text-xl" /></div>
+                        <span className="text-xs font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">Boosts</span>
                     </div>
-                    <button className="bg-white text-blue-600 py-2 px-4 rounded-xl font-bold text-sm w-full hover:bg-blue-50 transition-colors">
-                        Contacter Support
-                    </button>
+                    <h3 className="text-slate-500 font-medium text-sm mb-1">En cours</h3>
+                    <p className="text-3xl font-black text-slate-800 group-hover:text-orange-500 transition-colors">{activeBoosts || 0}</p>
                 </div>
+
+                {/* Revenue Card (Super Admin) or Interactions (Manager) */}
+                {isSuper ? (
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all hover:border-green-100 group lg:col-span-2">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-3 rounded-xl bg-green-100 text-green-600"><MdAttachMoney className="text-xl" /></div>
+                            <span className="text-xs font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">Total</span>
+                        </div>
+                        <h3 className="text-slate-500 font-medium text-sm mb-1">Revenus Générés</h3>
+                        <p className="text-3xl font-black text-slate-800 group-hover:text-green-600 transition-colors">
+                            {totalRevenue.toLocaleString()} <span className="text-lg font-bold text-slate-400">FCFA</span>
+                        </p>
+                    </div>
+                ) : (
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all hover:border-violet-100 group lg:col-span-2">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-3 rounded-xl bg-violet-100 text-violet-600"><MdPeople className="text-xl" /></div>
+                        </div>
+                        <h3 className="text-slate-500 font-medium text-sm mb-1">Interactions</h3>
+                        <p className="text-3xl font-black text-slate-800 group-hover:text-violet-600 transition-colors">-</p>
+                    </div>
+                )}
             </div>
+
+            {/* Charts Section (Super Admin Only) */}
+            {isSuper && last7DaysRevenue.length > 0 && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                        <RevenueChart data={last7DaysRevenue} />
+                    </div>
+
+                    {/* Activity Feed / Notifications Placeholder */}
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h3 className="text-lg font-bold text-slate-800 mb-6">Activité Récente</h3>
+                        <div className="text-center py-10 text-slate-400 text-sm">
+                            <p>Aucune nouvelle notification.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

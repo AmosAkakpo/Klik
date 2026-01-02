@@ -8,7 +8,10 @@ import {
     MdAddCircleOutline,
     MdRocketLaunch,
     MdPeople,
-    MdPerson
+    MdPerson,
+    MdSettings,
+    MdCategory,
+    MdLabel
 } from 'react-icons/md'
 
 interface AdminSidebarProps {
@@ -44,7 +47,19 @@ export default function AdminSidebar({ role }: AdminSidebarProps) {
             roles: ['super_admin', 'manager']
         },
         {
-            label: 'Gestionnaires',
+            label: 'Plans & Tarifs',
+            href: '/admin/plans',
+            icon: MdSettings,
+            roles: ['super_admin']
+        },
+        {
+            label: 'Catégories & Tags',
+            href: '/admin/categories',
+            icon: MdCategory,
+            roles: ['super_admin']
+        },
+        {
+            label: 'Utilisateurs',
             href: '/admin/managers',
             icon: MdPeople,
             roles: ['super_admin']
