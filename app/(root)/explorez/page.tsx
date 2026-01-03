@@ -1,72 +1,73 @@
 import { createClient } from '@/utils/supabase/server'
 import { MdSearch, MdFilterList } from 'react-icons/md'
+import ExploreHero from './components/ExploreHero'
+import FeaturedGrid from './components/FeaturedGrid'
 
 export default async function ExplorePage() {
   const supabase = await createClient()
 
   // 1. Fetch Hero Carousel Items (RPC)
+  // We use the RPC 'get_explore_hero' which returns 5 random premium/boosted items
   const { data: heroListings } = await supabase.rpc('get_explore_hero')
 
   // 2. Fetch Featured Items (Logic: e.g. Random Premium/Pro)
-  // We can use a simplified query for now or RPC
+  // We fetch a mix of items with priority > 0 (Basic is 1, so >1 means Pro/Premium ideally, but let's say > 0 covers paying users)
+  // Wait, recent plan change: Basic = 1. So we want Pro(10)/Premium(20). 
+  // Let's filter priority >= 10 for "Recommandés" to give value to Pro/Premium.
   const { data: featuredListings } = await supabase
     .from('listings')
     .select('*')
     .eq('status', 'active')
-    .gt('current_priority', 0) // Pro or Premium
+    .gte('current_priority', 10) // Pro (10) or Premium (20)
+    .order('current_priority', { ascending: false }) // Prioritize Premium
     .limit(6)
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      {/* SEARCH HEADER (Mobile Sticky) */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 p-4">
-        <div className="flex gap-2 max-w-5xl mx-auto">
-          <div className="relative flex-1">
-            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl" />
+    <div className="min-h-screen bg-neutral-950 pb-24 text-slate-200 selection:bg-rose-500/30">
+
+      {/* SEARCH HEADER (Sticky, Glassmorphism Dark) */}
+      <div className="sticky top-0 z-40 bg-neutral-950/80 backdrop-blur-xl border-b border-white/5 p-4">
+        <div className="flex gap-3 max-w-5xl mx-auto">
+          <div className="relative flex-1 group">
+            <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors text-xl" />
             <input
               disabled
               placeholder="Rechercher (Ex: Concert, Restaurant...)"
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
+              className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-neutral-900 border border-white/5 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 focus:outline-none font-medium placeholder:text-slate-600 transition-all text-white shadow-inner"
             />
           </div>
-          <button className="p-3 bg-white border border-slate-200 rounded-xl text-slate-700 shadow-sm hover:bg-slate-50">
+          <button className="p-3.5 bg-neutral-900 border border-white/5 rounded-2xl text-slate-400 hover:text-white hover:bg-neutral-800 hover:border-white/10 transition-all shadow-lg shadow-black/20 active:scale-95">
             <MdFilterList className="text-xl" />
           </button>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-6 space-y-10">
+      <div className="max-w-5xl mx-auto px-4 py-6 space-y-12">
+
         {/* 1. HERO CAROUSEL */}
         {heroListings && heroListings.length > 0 && (
-          <section>
-            <h2 className="text-lg font-bold text-slate-800 mb-4 px-1">À la une ⚡</h2>
-            {/* Placeholder for Carousel Component */}
-            <div className="aspect-[16/9] md:aspect-[21/9] bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400">
-              Carousel Component ({heroListings.length} items)
-            </div>
-          </section>
+          <div className="animate-fade-in-up">
+            {/* @ts-ignore */}
+            <ExploreHero listings={heroListings} />
+          </div>
         )}
 
-        {/* 2. FEATURED GRID */}
-        <section>
-          <div className="flex justify-between items-center mb-4 px-1">
-            <h2 className="text-lg font-bold text-slate-800">Recommandés</h2>
-            <span className="text-blue-600 text-sm font-bold">Voir tout</span>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {featuredListings?.map(l => (
-              <div key={l.id} className="bg-white p-4 rounded-xl shadow-sm h-40 flex items-center justify-center border border-slate-100">
-                {l.title}
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* 2. FEATURED GRID (Bento Style) */}
+        {featuredListings && featuredListings.length > 0 && (
+          // @ts-ignore
+          <FeaturedGrid listings={featuredListings} />
+        )}
 
-        {/* 3. EXPLORE FEED (Client Component will go here) */}
-        <section>
-          <h2 className="text-lg font-bold text-slate-800 mb-4 px-1">Explorez tout</h2>
-          <div className="bg-white p-8 rounded-2xl text-center text-slate-500 border border-slate-100">
-            Infinite Scroll Feed Loading...
+        {/* 3. EXPLORE FEED */}
+        <section className="animate-fade-in-up delay-200">
+          <div className="flex items-center gap-2 mb-6 px-1">
+            <h2 className="text-xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Explorer</h2>
+          </div>
+
+          <div className="bg-neutral-900/50 p-12 rounded-3xl border border-white/5 text-center">
+            <div className="w-12 h-12 mx-auto border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4" />
+            <p className="text-slate-500 text-sm font-medium">Chargement du flux intelligent...</p>
+            {/* Will implement Infinite Feed Component here */}
           </div>
         </section>
       </div>
