@@ -7,7 +7,7 @@ import { MdTrendingUp } from 'react-icons/md'
 interface Listing {
     id: string
     title: string
-    images: string[]
+    images: any[]
     price: number
     current_priority: number
 }
@@ -35,7 +35,7 @@ export default function FeaturedGrid({ listings }: { listings: Listing[] }) {
                         {/* Image */}
                         {l.images?.[0] ? (
                             <Image
-                                src={l.images[0]}
+                                src={typeof l.images[0] === 'string' ? l.images[0] : (l.images[0] as any).url || null}
                                 alt={l.title}
                                 fill
                                 className="object-cover transition-transform duration-700 group-hover:scale-105"

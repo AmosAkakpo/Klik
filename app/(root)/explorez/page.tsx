@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { MdSearch, MdFilterList } from 'react-icons/md'
 import ExploreHero from './components/ExploreHero'
 import FeaturedGrid from './components/FeaturedGrid'
+import ExploreFeed from './components/ExploreFeed'
 
 export default async function ExplorePage() {
   const supabase = await createClient()
@@ -64,11 +65,7 @@ export default async function ExplorePage() {
             <h2 className="text-xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Explorer</h2>
           </div>
 
-          <div className="bg-neutral-900/50 p-12 rounded-3xl border border-white/5 text-center">
-            <div className="w-12 h-12 mx-auto border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4" />
-            <p className="text-slate-500 text-sm font-medium">Chargement du flux intelligent...</p>
-            {/* Will implement Infinite Feed Component here */}
-          </div>
+          <ExploreFeed />
         </section>
       </div>
     </div>

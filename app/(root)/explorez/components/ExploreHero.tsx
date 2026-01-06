@@ -8,7 +8,7 @@ import { MdLocalFireDepartment, MdLocationOn } from 'react-icons/md'
 interface Listing {
     id: string
     title: string
-    images: string[]
+    images: any[] // Can be string[] or {url: string}[]
     location_city: string
     price: number
 }
@@ -39,7 +39,7 @@ export default function ExploreHero({ listings }: { listings: Listing[] }) {
                 >
                     {item.images?.[0] ? (
                         <Image
-                            src={item.images[0]}
+                            src={typeof item.images[0] === 'string' ? item.images[0] : (item.images[0] as any).url || null}
                             alt={item.title}
                             fill
                             className="object-cover"
