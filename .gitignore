@@ -32,7 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-#sql files and other planning files 
+#sql files and other planning files
+/db
+/db_scripts
+
 
 # vercel
 .vercel
