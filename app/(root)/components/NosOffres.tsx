@@ -53,9 +53,6 @@ const NosOffres = () => {
                 ))}
             </div>
 
-            <div>
-                <p>Vous pouvez aussi beneficier de l'offre boost pour votre annonce pendant 24h our 48hr</p>
-            </div>
         </div>
     )
 }

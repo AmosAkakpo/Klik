@@ -11,7 +11,8 @@ import {
     MdPerson,
     MdSettings,
     MdCategory,
-    MdLabel
+    MdLabel,
+    MdPublic
 } from 'react-icons/md'
 
 interface AdminSidebarProps {
@@ -50,6 +51,12 @@ export default function AdminSidebar({ role }: AdminSidebarProps) {
             label: 'Plans & Tarifs',
             href: '/admin/plans',
             icon: MdSettings,
+            roles: ['super_admin']
+        },
+        {
+            label: 'Lieux (Pays/Villes)',
+            href: '/admin/locations',
+            icon: MdPublic,
             roles: ['super_admin']
         },
         {

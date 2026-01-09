@@ -5,27 +5,23 @@ const Questions = () => {
     const faqs = [
         {
             question: "Comment publier une annonce sur KLik ?",
-            answer: "Il vous suffit de cliquer sur 'Publier une annonce', de remplir les informations demandées (titre, description, catégorie, localisation), d'ajouter des photos si nécessaire, et de soumettre votre annonce. Elle sera visible immédiatement après validation."
+            answer: "C'est simple ! Contactez nous, choisissez l'offre qui vous convient (Basique, Pro ou Premium), et remplissez les détails de votre service ou événement. Votre annonce sera visible immédiatement après validation par notre équipe."
         },
         {
-            question: "Les annonces sont-elles gratuites ?",
-            answer: "Oui, la publication d'annonces basiques est entièrement gratuite. Nous proposons également des options Premium pour augmenter la visibilité de vos annonces avec des fonctionnalités supplémentaires comme la mise en avant et les statistiques détaillées."
-        },
-        {
-            question: "Comment contacter un vendeur ou prestataire ?",
-            answer: "Chaque annonce dispose d'un bouton de contact direct qui vous permet de joindre le vendeur via WhatsApp. Vous pouvez ainsi échanger rapidement et en toute sécurité."
-        },
-        {
-            question: "Puis-je modifier ou supprimer mon annonce après publication ?",
-            answer: "Absolument ! Une fois connecté à votre compte, accédez à 'Mes annonces' où vous pourrez modifier, mettre en pause ou supprimer vos annonces à tout moment."
-        },
-        {
-            question: "Quelles sont les catégories disponibles ?",
-            answer: "KLik couvre plusieurs catégories : Événements, Services, Restaurants & Cafés, Immobilier, Emploi, Véhicules, et bien plus. Vous pouvez facilement naviguer par catégorie pour trouver ce que vous cherchez."
+            question: "Quelles sont les différentes offres disponibles ?",
+            answer: "Nous proposons trois niveaux : Basique, Pro et Premium pour une visibility maximale. Chaque offre est conçue pour s'adapter à vos besoins et à votre budget."
         },
         {
             question: "Comment fonctionne l'offre Boost ?",
-            answer: "L'offre Boost permet de mettre votre annonce en avant pendant 24h ou 48h. Votre annonce apparaîtra en haut des résultats de recherche et aura une visibilité maximale, augmentant ainsi vos chances de contact."
+            answer: "L'offre Boost est une option supplémentaire qui propulse votre annonce tout en haut de la page 'Explorer' pendant 24h ou 48h. C'est l'outil idéal pour un événement ponctuel ou une promotion urgente et valable seulement pour la souscription premium."
+        },
+        {
+            question: "Comment les utilisateurs peuvent-ils me contacter ?",
+            answer: "Klik privilégie le contact direct. Chaque annonce affiche un bouton WhatsApp et un numéro de téléphone permettant aux clients de vous joindre instantanément en un clic, sans intermédiaire."
+        },
+        {
+            question: "Klik consomme-t-il beaucoup de données mobiles ?",
+            answer: "Non, nous avons optimisé KLik pour le contexte béninois. La page d'exploration utilise un chargement intelligent et des images compressées pour minimiser la consommation de votre forfait internet tout en restant fluide."
         }
     ]
 

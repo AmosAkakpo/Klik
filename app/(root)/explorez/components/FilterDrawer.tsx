@@ -8,6 +8,7 @@ interface FilterDrawerProps {
     onClose: () => void
     onApplyFilters: (filters: FilterState) => void
     categories: { id: string; name: string; slug: string }[]
+    cities: { id: string; name: string }[]
 }
 
 export interface FilterState {
@@ -17,9 +18,9 @@ export interface FilterState {
     maxPrice: string
 }
 
-const CITIES = ['Cotonou', 'Porto-Novo', 'Parakou', 'Abomey-Calavi', 'Ouidah', 'Bohicon']
 
-export default function FilterDrawer({ isOpen, onClose, onApplyFilters, categories }: FilterDrawerProps) {
+
+export default function FilterDrawer({ isOpen, onClose, onApplyFilters, categories, cities }: FilterDrawerProps) {
     const [filters, setFilters] = useState<FilterState>({
         city: '',
         category: '',
@@ -77,8 +78,8 @@ export default function FilterDrawer({ isOpen, onClose, onApplyFilters, categori
                             className="w-full px-4 py-3 rounded-xl bg-neutral-800 border border-white/10 text-white focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                         >
                             <option value="">Toutes les villes</option>
-                            {CITIES.map(city => (
-                                <option key={city} value={city}>{city}</option>
+                            {cities.map(city => (
+                                <option key={city.id} value={city.id}>{city.name}</option>
                             ))}
                         </select>
                     </div>

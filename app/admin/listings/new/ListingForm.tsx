@@ -22,6 +22,18 @@ interface Plan {
     video_allowed: boolean
 }
 
+interface Country {
+    id: string
+    name: string
+    code: string
+}
+
+interface City {
+    id: string
+    name: string
+    country_id: string
+}
+
 interface ListingFormProps {
     categories: Category[]
     tags: Tag[]
@@ -35,6 +47,66 @@ export default function ListingForm({ categories, tags, plans }: ListingFormProp
     const [selectedPlanId, setSelectedPlanId] = useState<string>('')
     const [paymentAmount, setPaymentAmount] = useState<number>(0)
     const [error, setError] = useState<string | null>(null)
+
+    // Location state
+    const [countries, setCountries] = useState<Country[]>([])
+    const [cities, setCities] = useState<City[]>([])
+    const [selectedCountryId, setSelectedCountryId] = useState<string>('')
+    const [selectedCityId, setSelectedCityId] = useState<string>('')
+    const [filteredCities, setFilteredCities] = useState<City[]>([])
+
+    // Fetch countries and cities
+    useEffect(() => {
+        const fetchLocations = async () => {
+            try {
+                const { createClient } = await import('@/utils/supabase/client')
+                const supabase = createClient()
+
+                console.log('Fetching countries and cities...')
+
+                const { data: countriesData, error: countriesError } = await supabase
+                    .from('countries')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('name')
+
+                const { data: citiesData, error: citiesError } = await supabase
+                    .from('cities')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('display_order')
+
+                if (countriesError) {
+                    console.error('Error fetching countries:', countriesError)
+                } else {
+                    console.log('Countries fetched:', countriesData)
+                    if (countriesData) setCountries(countriesData)
+                }
+
+                if (citiesError) {
+                    console.error('Error fetching cities:', citiesError)
+                } else {
+                    console.log('Cities fetched:', citiesData)
+                    if (citiesData) setCities(citiesData)
+                }
+            } catch (err) {
+                console.error('Exception in fetchLocations:', err)
+            }
+        }
+        fetchLocations()
+    }, [])
+
+    // Filter cities when country changes
+    useEffect(() => {
+        if (selectedCountryId) {
+            const filtered = cities.filter(c => c.country_id === selectedCountryId)
+            setFilteredCities(filtered)
+            setSelectedCityId('') // Reset city selection
+        } else {
+            setFilteredCities([])
+            setSelectedCityId('')
+        }
+    }, [selectedCountryId, cities])
 
     // Update payment amount when plan changes
     useEffect(() => {
@@ -300,13 +372,54 @@ export default function ListingForm({ categories, tags, plans }: ListingFormProp
                         <p className="text-xs text-slate-400 mt-1">Prix du service/produit pour le client final.</p>
                     </div>
                     <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Pays</label>
+                        <div className="relative">
+                            <select
+                                name="country_id"
+                                required
+                                value={selectedCountryId}
+                                onChange={(e) => setSelectedCountryId(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all appearance-none"
+                            >
+                                <option value="">Choisir un pays...</option>
+                                {countries.map(country => (
+                                    <option key={country.id} value={country.id}>{country.name}</option>
+                                ))}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">Ville</label>
-                        <input name="location_city" required type="text" placeholder="Ex: Cotonou"
+                        <div className="relative">
+                            <select
+                                name="city_id"
+                                required
+                                value={selectedCityId}
+                                onChange={(e) => setSelectedCityId(e.target.value)}
+                                disabled={!selectedCountryId}
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <option value="">Choisir une ville...</option>
+                                {filteredCities.map(city => (
+                                    <option key={city.id} value={city.id}>{city.name}</option>
+                                ))}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Quartier (Optionnel)</label>
+                        <input name="location_district" type="text" placeholder="Ex: Cadjehoun, Akpakpa..."
                             className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all" />
                     </div>
                     <div className="col-span-2">
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Adresse / Quartier</label>
-                        <input name="location_address" type="text" placeholder="Ex: Cadjehoun, rue après la pharmacie..."
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Adresse Complète (Optionnel)</label>
+                        <input name="location_address" type="text" placeholder="Ex: Rue après la pharmacie, près du marché..."
                             className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all" />
                     </div>
                 </div>

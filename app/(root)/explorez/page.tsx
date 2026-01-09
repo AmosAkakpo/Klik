@@ -13,6 +13,7 @@ export default function ExplorePage() {
   const [heroListings, setHeroListings] = useState<any[]>([])
   const [featuredListings, setFeaturedListings] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
+  const [cities, setCities] = useState<any[]>([])
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<FilterState>({
@@ -46,6 +47,14 @@ export default function ExplorePage() {
         .eq('is_active', true)
         .order('display_order')
       if (cats) setCategories(cats)
+
+      // Cities for filter
+      const { data: citiesData } = await supabase
+        .from('cities')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('display_order')
+      if (citiesData) setCities(citiesData)
     }
 
     fetchData()
@@ -66,6 +75,7 @@ export default function ExplorePage() {
         onClose={() => setFilterDrawerOpen(false)}
         onApplyFilters={setFilters}
         categories={categories}
+        cities={cities}
       />
 
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-12">
