@@ -23,9 +23,9 @@ STABLE
 AS $$
     SELECT 
         l.id,
-        l.title,
+        l.title::text,
         l.images,
-        l.location_city,
+        l.location_city::text,
         l.price
     FROM listings l
     WHERE l.status = 'active'
@@ -51,9 +51,9 @@ STABLE
 AS $$
     SELECT 
         id,
-        title,
+        title::text,
         images,
-        location_city,
+        location_city::text,
         price,
         current_priority
     FROM listings
@@ -88,11 +88,11 @@ BEGIN
     RETURN QUERY
     SELECT 
         l.id,
-        l.title,
+        l.title::text,
         l.price,
         l.images,
-        l.location_city,
-        p.slug as plan_slug,
+        l.location_city::text,
+        p.slug::text as plan_slug,
         (l.current_priority >= 100) as is_boosted,
         
         -- SCORING ALGORITHM

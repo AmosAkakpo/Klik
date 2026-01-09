@@ -1,47 +1,72 @@
-import { createClient } from '@/utils/supabase/server'
-import { MdSearch, MdFilterList } from 'react-icons/md'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { createClient } from '@/utils/supabase/client'
 import ExploreHero from './components/ExploreHero'
 import FeaturedGrid from './components/FeaturedGrid'
 import ExploreFeed from './components/ExploreFeed'
+import SearchHeader from './components/SearchHeader'
+import FilterDrawer, { FilterState } from './components/FilterDrawer'
 
-export default async function ExplorePage() {
-  const supabase = await createClient()
+export default function ExplorePage() {
+  const supabase = createClient()
+  const [heroListings, setHeroListings] = useState<any[]>([])
+  const [featuredListings, setFeaturedListings] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filters, setFilters] = useState<FilterState>({
+    city: '',
+    category: '',
+    minPrice: '',
+    maxPrice: ''
+  })
 
-  // 1. Fetch Hero Carousel Items (RPC)
-  // We use the RPC 'get_explore_hero' which returns 5 random premium/boosted items
-  const { data: heroListings } = await supabase.rpc('get_explore_hero')
+  // Fetch initial data
+  useEffect(() => {
+    const fetchData = async () => {
+      // Hero listings
+      const { data: hero } = await supabase.rpc('get_explore_hero')
+      if (hero) setHeroListings(hero)
 
-  // 2. Fetch Featured Items (Logic: e.g. Random Premium/Pro)
-  // We fetch a mix of items with priority > 0 (Basic is 1, so >1 means Pro/Premium ideally, but let's say > 0 covers paying users)
-  // Wait, recent plan change: Basic = 1. So we want Pro(10)/Premium(20). 
-  // Let's filter priority >= 10 for "Recommandés" to give value to Pro/Premium.
-  const { data: featuredListings } = await supabase
-    .from('listings')
-    .select('*')
-    .eq('status', 'active')
-    .gte('current_priority', 10) // Pro (10) or Premium (20)
-    .order('current_priority', { ascending: false }) // Prioritize Premium
-    .limit(6)
+      // Featured listings
+      const { data: featured } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('status', 'active')
+        .gte('current_priority', 10)
+        .order('current_priority', { ascending: false })
+        .limit(6)
+      if (featured) setFeaturedListings(featured)
+
+      // Categories for filter
+      const { data: cats } = await supabase
+        .from('categories')
+        .select('id, name, slug')
+        .eq('is_active', true)
+        .order('display_order')
+      if (cats) setCategories(cats)
+    }
+
+    fetchData()
+  }, [])
 
   return (
     <div className="min-h-screen bg-neutral-950 pb-24 text-slate-200 selection:bg-rose-500/30">
 
-      {/* SEARCH HEADER (Sticky, Glassmorphism Dark) */}
-      <div className="sticky top-0 z-40 bg-neutral-950/80 backdrop-blur-xl border-b border-white/5 p-4">
-        <div className="flex gap-3 max-w-5xl mx-auto">
-          <div className="relative flex-1 group">
-            <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors text-xl" />
-            <input
-              disabled
-              placeholder="Rechercher (Ex: Concert, Restaurant...)"
-              className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-neutral-900 border border-white/5 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 focus:outline-none font-medium placeholder:text-slate-600 transition-all text-white shadow-inner"
-            />
-          </div>
-          <button className="p-3.5 bg-neutral-900 border border-white/5 rounded-2xl text-slate-400 hover:text-white hover:bg-neutral-800 hover:border-white/10 transition-all shadow-lg shadow-black/20 active:scale-95">
-            <MdFilterList className="text-xl" />
-          </button>
-        </div>
-      </div>
+      {/* SEARCH HEADER */}
+      <SearchHeader
+        onSearch={setSearchQuery}
+        onFilterOpen={() => setFilterDrawerOpen(true)}
+      />
+
+      {/* FILTER DRAWER */}
+      <FilterDrawer
+        isOpen={filterDrawerOpen}
+        onClose={() => setFilterDrawerOpen(false)}
+        onApplyFilters={setFilters}
+        categories={categories}
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-12">
 
@@ -65,7 +90,7 @@ export default async function ExplorePage() {
             <h2 className="text-xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Explorer</h2>
           </div>
 
-          <ExploreFeed />
+          <ExploreFeed searchQuery={searchQuery} filters={filters} />
         </section>
       </div>
     </div>

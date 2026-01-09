@@ -97,7 +97,7 @@ export default function ExploreHero({ listings }: { listings: Listing[] }) {
                 </div>
             </div>
 
-            <Link href={`/listings/${activeListing.id}`} className="absolute inset-0 z-10" aria-label={`Voir ${activeListing.title}`} />
+            <Link href={`/explorez/${activeListing.id}`} className="absolute inset-0 z-10" aria-label={`Voir ${activeListing.title}`} />
         </div>
     )
 }

@@ -28,7 +28,7 @@ export default function FeaturedGrid({ listings }: { listings: Listing[] }) {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {listings.map((l, i) => (
                     <Link
-                        href={`/listings/${l.id}`}
+                        href={`/explorez/${l.id}`}
                         key={l.id}
                         className={`group relative overflow-hidden rounded-2xl bg-neutral-900 border border-white/5 hover:border-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/10 ${i === 0 ? 'col-span-2 md:col-span-1 md:row-span-2 aspect-square' : 'aspect-[4/3]'}`}
                     >

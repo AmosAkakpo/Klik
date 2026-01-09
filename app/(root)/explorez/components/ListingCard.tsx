@@ -16,22 +16,36 @@ interface ListingProps {
     }
 }
 
-export default function ListingCard({ listing }: ListingProps) {
-    // Handle JSONB images - could be array of strings or array of objects with 'url' property
-    let imageUrl = null
+// Helper to optimize image URLs for low data usage
+function optimizeImageUrl(url: string | null): string | null {
+    if (!url) return null
 
-    if (listing.images && listing.images.length > 0) {
-        const firstImage = listing.images[0]
-        if (typeof firstImage === 'string') {
-            imageUrl = firstImage
-        } else if (firstImage && typeof firstImage === 'object' && 'url' in firstImage) {
-            imageUrl = firstImage.url
-        }
+    // For external URLs (unsplash, picsum), add size/quality params
+    if (url.includes('unsplash.com')) {
+        return `${url}&w=400&q=75&auto=format`
     }
+    if (url.includes('picsum.photos')) {
+        return url.replace(/\/\d+\/\d+/, '/400/300')
+    }
+
+    // For Supabase storage, add transform params
+    if (url.includes('supabase.co')) {
+        return `${url}?width=400&quality=75`
+    }
+
+    return url
+}
+
+export default function ListingCard({ listing }: ListingProps) {
+    const rawImageUrl = typeof listing.images?.[0] === 'string'
+        ? listing.images[0]
+        : listing.images?.[0]?.url || null
+
+    const imageUrl = optimizeImageUrl(rawImageUrl)
 
     return (
         <Link
-            href={`/listings/${listing.id}`}
+            href={`/explorez/${listing.id}`}
             className="group block bg-neutral-900/40 rounded-3xl overflow-hidden border border-white/5 hover:border-blue-500/30 transition-all hover:bg-neutral-900 shadow-lg shadow-black/20"
         >
             <div className="relative aspect-[4/3] overflow-hidden">
