@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import ExploreHero from './components/ExploreHero'
 import FeaturedGrid from './components/FeaturedGrid'
 import ExploreFeed from './components/ExploreFeed'
+import RecentSection from './components/RecentSection'
 import SearchHeader from './components/SearchHeader'
 import FilterDrawer, { FilterState } from './components/FilterDrawer'
 
@@ -12,6 +13,7 @@ export default function ExplorePage() {
   const supabase = createClient()
   const [heroListings, setHeroListings] = useState<any[]>([])
   const [featuredListings, setFeaturedListings] = useState<any[]>([])
+  const [recentListings, setRecentListings] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [cities, setCities] = useState<any[]>([])
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
@@ -39,6 +41,15 @@ export default function ExplorePage() {
         .order('current_priority', { ascending: false })
         .limit(6)
       if (featured) setFeaturedListings(featured)
+
+      // Recent listings
+      const { data: recent } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('status', 'active')
+        .order('published_at', { ascending: false })
+        .limit(8)
+      if (recent) setRecentListings(recent)
 
       // Categories for filter
       const { data: cats } = await supabase
@@ -93,6 +104,9 @@ export default function ExplorePage() {
           // @ts-ignore
           <FeaturedGrid listings={featuredListings} />
         )}
+
+        {/* 2.5. RECENT / TRENDING SECTION */}
+        <RecentSection listings={recentListings} />
 
         {/* 3. EXPLORE FEED */}
         <section className="animate-fade-in-up delay-200">

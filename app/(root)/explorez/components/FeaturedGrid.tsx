@@ -22,7 +22,7 @@ export default function FeaturedGrid({ listings }: { listings: Listing[] }) {
                     <span className="p-1.5 rounded-lg bg-blue-500/10 text-blue-500"><MdTrendingUp className="text-xl" /></span>
                     <h2 className="text-xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Recommandés</h2>
                 </div>
-                <button className="text-sm font-bold text-slate-500 hover:text-blue-400 transition-colors">Tout voir</button>
+                {/* <button className="text-sm font-bold text-slate-500 hover:text-blue-400 transition-colors">Tout voir</button> */}
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

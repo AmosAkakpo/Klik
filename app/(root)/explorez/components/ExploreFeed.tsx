@@ -132,7 +132,7 @@ export default function ExploreFeed({ searchQuery, filters }: ExploreFeedProps) 
                     >
                         Charger plus d'annonces
                     </button>
-                    <p className="text-slate-600 text-xs mt-3 font-medium">📊 Économie de données activée</p>
+                    {/* <p className="text-slate-600 text-xs mt-3 font-medium">📊 Économie de données activée</p> */}
                 </div>
             )}
 
